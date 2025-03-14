@@ -14,8 +14,7 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/firebase';
+
 
 const { width } = Dimensions.get('window');
 
@@ -46,28 +45,23 @@ export default function LoginScreen({ navigation }: Props) {
     setIsLoading(true);
 
     try {
-      // Sign in with email and password
-      await signInWithEmailAndPassword(auth, email, password);
+      // Mock authentication instead of Firebase
+      // In a real app, you would implement your own auth logic here
       
-      // In a real app, you would check the user type from your database
-      // For this example, we'll use the selected user type
-      if (userType === 'doctor') {
-        navigation.navigate('DoctorDashboard');
+      // Simple validation for demo purposes
+      if (email === 'doctor@example.com' && password === 'password') {
+        // Navigate based on user type
+        if (userType === 'doctor') {
+          navigation.navigate('DoctorDashboard');
+        } else {
+          navigation.navigate('PatientDashboard', { patientId: '1' });
+        }
       } else {
-        navigation.navigate('PatientDashboard', { patientId: '1' });
+        Alert.alert('Error', 'Invalid email or password');
       }
       
     } catch (error: any) {
-      // Handle specific Firebase auth errors
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-        Alert.alert('Error', 'Invalid email or password');
-      } else if (error.code === 'auth/invalid-email') {
-        Alert.alert('Error', 'Invalid email address format');
-      } else if (error.code === 'auth/too-many-requests') {
-        Alert.alert('Error', 'Too many failed login attempts. Please try again later.');
-      } else {
-        Alert.alert('Error', error.message || 'Failed to sign in');
-      }
+      Alert.alert('Error', 'Failed to sign in');
     } finally {
       setIsLoading(false);
     }
@@ -152,3 +146,77 @@ export default function LoginScreen({ navigation }: Props) {
     </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#121212' // Dark background
+  },
+  scrollContent: {
+    flexGrow: 1,
+    padding: 20
+  },
+  header: {
+    alignItems: 'center',
+    marginTop: 40,
+    marginBottom: 30
+  },
+  logo: {
+    width: width * 0.4,
+    height: width * 0.4,
+    resizeMode: 'contain',
+    marginBottom: 20
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF', // Light text for dark background
+    marginBottom: 10
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#BBBBBB' // Slightly dimmed text for subtitles
+  },
+  userTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 30
+  },
+  userTypeButton: {
+    flex: 1,
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: '#333333', // Dark button background
+    marginHorizontal: 5,
+    alignItems: 'center'
+  },
+  activeUserType: {
+    backgroundColor: '#1565C0' // Blue accent color for active state
+  },
+  userTypeText: {
+    fontSize: 16,
+    color: '#BBBBBB' // Light text
+  },
+  activeUserTypeText: {
+    color: '#FFFFFF' // White text for active state
+  },
+  form: {
+    marginBottom: 30
+  },
+  button: {
+    marginTop: 20
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  footerText: {
+    color: '#BBBBBB', // Light gray text
+    marginRight: 5
+  },
+  signupText: {
+    color: '#64B5F6', // Light blue for links
+    fontWeight: 'bold'
+  }
+});

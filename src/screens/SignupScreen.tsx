@@ -51,11 +51,8 @@ export default function SignupScreen({ navigation }: Props) {
     setIsLoading(true);
 
     try {
-      // Create user with email and password
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
-      // You can store additional user data in Firestore here
-      // For example: user type (doctor/patient), username, etc.
+      // Mock user creation instead of Firebase
+      // In a real app, you would implement your own user creation logic here
       
       setIsLoading(false);
       
@@ -68,17 +65,7 @@ export default function SignupScreen({ navigation }: Props) {
       
     } catch (error: any) {
       setIsLoading(false);
-      
-      // Handle specific Firebase auth errors
-      if (error.code === 'auth/email-already-in-use') {
-        Alert.alert('Error', 'Email address is already in use');
-      } else if (error.code === 'auth/invalid-email') {
-        Alert.alert('Error', 'Invalid email address format');
-      } else if (error.code === 'auth/weak-password') {
-        Alert.alert('Error', 'Password is too weak');
-      } else {
-        Alert.alert('Error', error.message || 'Failed to create account');
-      }
+      Alert.alert('Error', 'Failed to create account');
     }
   };
 

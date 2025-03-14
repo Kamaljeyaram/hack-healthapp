@@ -1,17 +1,11 @@
-import { initializeApp } from '@firebase/app';
-import { getAuth } from 'firebase/auth';
+// This file will now provide a mock auth service instead of Firebase
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDYQxDWHsGI9_QJZj-PwfQOXEDLJm_RKWQ",
-  authDomain: "hack-auth-bd12f.firebaseapp.com",
-  projectId: "hack-auth-bd12f",
-  storageBucket: "hack-auth-bd12f.appspot.com",
-  messagingSenderId: "1015184245778",
-  appId: "1:1015184245778:web:b9a9a9b9a9a9b9a9a9a9b9"
+// Mock auth interface to maintain compatibility with existing code
+export const auth = {
+  // Mock methods that return promises to simulate async behavior
+  currentUser: null,
+  signOut: async () => Promise.resolve(),
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export default app;
+// Export a dummy app object to maintain compatibility
+export default {};

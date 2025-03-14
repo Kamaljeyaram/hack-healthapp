@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -78,8 +78,78 @@ export default function PatientDashboard({ route, navigation }: Props) {
   // Add a default value if route.params is undefined
   const { patientId = '1' } = route?.params || {};
   
-  // In a real app, you would fetch the patient data based on the ID
-  // For this example, we'll use the mock data
+  // Create state for vital signs that will be updated
+  const [vitalSigns, setVitalSigns] = useState(patientData.vitalSigns);
+  const [heartRateHistory, setHeartRateHistory] = useState(patientData.vitalSigns.heartRate.data);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Function to generate realistic vital sign changes
+  const generateVitalSigns = () => {
+    // Generate realistic variations for heart rate (small changes)
+    const lastHeartRate = vitalSigns.heartRate.current;
+    const heartRateChange = Math.floor(Math.random() * 5) - 2; // -2 to +2
+    const newHeartRate = Math.max(60, Math.min(100, lastHeartRate + heartRateChange));
+    
+    // Generate blood pressure variations
+    const lastSystolic = parseInt(vitalSigns.bloodPressure.current.split('/')[0]);
+    const lastDiastolic = parseInt(vitalSigns.bloodPressure.current.split('/')[1]);
+    const systolicChange = Math.floor(Math.random() * 5) - 2; // -2 to +2
+    const diastolicChange = Math.floor(Math.random() * 3) - 1; // -1 to +1
+    const newSystolic = Math.max(100, Math.min(140, lastSystolic + systolicChange));
+    const newDiastolic = Math.max(60, Math.min(90, lastDiastolic + diastolicChange));
+    
+    // Generate temperature variations (very small changes)
+    const lastTemp = vitalSigns.temperature.current;
+    const tempChange = (Math.random() * 0.2) - 0.1; // -0.1 to +0.1
+    const newTemp = Math.max(36.0, Math.min(37.5, lastTemp + tempChange)).toFixed(1);
+    
+    // Generate oxygen saturation variations
+    const lastOxygen = vitalSigns.oxygenSaturation.current;
+    const oxygenChange = Math.floor(Math.random() * 3) - 1; // -1 to +1
+    const newOxygen = Math.max(95, Math.min(100, lastOxygen + oxygenChange));
+    
+    // Update vital signs state
+    setVitalSigns({
+      heartRate: {
+        ...vitalSigns.heartRate,
+        current: newHeartRate
+      },
+      bloodPressure: {
+        ...vitalSigns.bloodPressure,
+        current: `${newSystolic}/${newDiastolic}`
+      },
+      temperature: {
+        ...vitalSigns.temperature,
+        current: parseFloat(newTemp)
+      },
+      oxygenSaturation: {
+        ...vitalSigns.oxygenSaturation,
+        current: newOxygen
+      }
+    });
+    
+    // Update heart rate history for the chart
+    const newHistory = [...heartRateHistory.slice(1), newHeartRate];
+    setHeartRateHistory(newHistory);
+  };
+  
+  // Set up the timer to update vital signs every 5 seconds
+  useEffect(() => {
+    // Initial update
+    generateVitalSigns();
+    
+    // Set interval for updates
+    timerRef.current = setInterval(() => {
+      generateVitalSigns();
+    }, 5000);
+    
+    // Clean up on unmount
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
 
   const chartConfig = {
     backgroundGradientFrom: '#1E1E1E',
@@ -113,22 +183,22 @@ export default function PatientDashboard({ route, navigation }: Props) {
         <View style={styles.vitalSignsContainer}>
           <View style={styles.vitalSign}>
             <Icon name="heart-pulse" size={24} color="#F44336" />
-            <Text style={styles.vitalValue}>{patientData.vitalSigns.heartRate.current}</Text>
+            <Text style={styles.vitalValue}>{vitalSigns.heartRate.current}</Text>
             <Text style={styles.vitalLabel}>Heart Rate</Text>
           </View>
           <View style={styles.vitalSign}>
             <Icon name="blood-bag" size={24} color="#2196F3" />
-            <Text style={styles.vitalValue}>{patientData.vitalSigns.bloodPressure.current}</Text>
+            <Text style={styles.vitalValue}>{vitalSigns.bloodPressure.current}</Text>
             <Text style={styles.vitalLabel}>Blood Pressure</Text>
           </View>
           <View style={styles.vitalSign}>
             <Icon name="thermometer" size={24} color="#FF9800" />
-            <Text style={styles.vitalValue}>{patientData.vitalSigns.temperature.current}°C</Text>
+            <Text style={styles.vitalValue}>{vitalSigns.temperature.current}°C</Text>
             <Text style={styles.vitalLabel}>Temperature</Text>
           </View>
           <View style={styles.vitalSign}>
             <Icon name="lungs" size={24} color="#4CAF50" />
-            <Text style={styles.vitalValue}>{patientData.vitalSigns.oxygenSaturation.current}%</Text>
+            <Text style={styles.vitalValue}>{vitalSigns.oxygenSaturation.current}%</Text>
             <Text style={styles.vitalLabel}>O₂ Saturation</Text>
           </View>
         </View>
@@ -141,7 +211,7 @@ export default function PatientDashboard({ route, navigation }: Props) {
             labels: patientData.vitalSigns.heartRate.labels,
             datasets: [
               {
-                data: patientData.vitalSigns.heartRate.data,
+                data: heartRateHistory,
                 color: (opacity = 1) => `rgba(244, 67, 54, ${opacity})`,
                 strokeWidth: 2
               }
