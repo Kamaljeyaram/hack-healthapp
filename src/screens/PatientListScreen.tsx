@@ -1,0 +1,216 @@
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+} from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
+const { width } = Dimensions.get('window');
+
+type Patient = {
+  id: string;
+  name: string;
+  age: number;
+  condition: string;
+  roomNumber: string;
+  lastCheckup: string;
+  imageUrl: number;
+  status: 'stable' | 'critical' | 'improving';
+};
+
+const mockPatients: Patient[] = [
+  {
+    id: '1',
+    name: 'John Smith',
+    age: 45,
+    condition: 'Post-surgery recovery',
+    roomNumber: '301',
+    lastCheckup: '2 hours ago',
+    imageUrl: require('../../assets/patient1.png'),
+    status: 'stable',
+  },
+  {
+    id: '2',
+    name: 'Emily Johnson',
+    age: 32,
+    condition: 'Pneumonia',
+    roomNumber: '205',
+    lastCheckup: '30 minutes ago',
+    imageUrl: require('../../assets/patient2.png'),
+    status: 'improving',
+  },
+  {
+    id: '3',
+    name: 'Robert Williams',
+    age: 68,
+    condition: 'Cardiac monitoring',
+    roomNumber: '410',
+    lastCheckup: '1 hour ago',
+    imageUrl: require('../../assets/patient3.png'),
+    status: 'critical',
+  },
+];
+
+type RootStackParamList = {
+  PatientList: undefined;
+  PatientDashboard: { patientId: string };
+};
+
+type Props = {
+  navigation: NativeStackNavigationProp<RootStackParamList>;
+};
+
+export default function PatientListScreen({ navigation }: Props) {
+  const getStatusColor = (status: Patient['status']) => {
+    switch (status) {
+      case 'stable': return '#4CAF50';
+      case 'improving': return '#2196F3';
+      case 'critical': return '#F44336';
+      default: return '#4CAF50';
+    }
+  };
+
+  const renderPatientCard = ({ item }: { item: Patient }) => (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => navigation.navigate('PatientDashboard', { patientId: item.id })}>
+      <View style={styles.cardHeader}>
+        <Image source={item.imageUrl} style={styles.patientImage} />
+        <View style={styles.patientInfo}>
+          <Text style={styles.patientName}>{item.name}</Text>
+          <Text style={styles.patientDetails}>Age: {item.age} • Room: {item.roomNumber}</Text>
+          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
+            <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.cardContent}>
+        <View style={styles.infoRow}>
+          <Icon name="medical-bag" size={18} color="#90CAF9" />
+          <Text style={styles.conditionText}>{item.condition}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Icon name="clock-outline" size={18} color="#90CAF9" />
+          <Text style={styles.checkupText}>Last checkup: {item.lastCheckup}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>My Patients</Text>
+        <TouchableOpacity style={styles.filterButton}>
+          <Icon name="filter-variant" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        data={mockPatients}
+        renderItem={renderPatientCard}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.listContainer}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#121212',
+  },
+  header: {
+    padding: 20,
+    backgroundColor: '#1565C0',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  filterButton: {
+    padding: 8,
+  },
+  listContainer: {
+    padding: 16,
+  },
+  card: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 12,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    overflow: 'hidden',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333333',
+  },
+  patientImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 16,
+  },
+  patientInfo: {
+    flex: 1,
+  },
+  patientName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  patientDetails: {
+    fontSize: 14,
+    color: '#BBBBBB',
+    marginBottom: 8,
+  },
+  statusBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  statusText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  cardContent: {
+    padding: 16,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  conditionText: {
+    color: '#FFFFFF',
+    marginLeft: 8,
+    fontSize: 15,
+  },
+  checkupText: {
+    color: '#BBBBBB',
+    marginLeft: 8,
+    fontSize: 14,
+  },
+});

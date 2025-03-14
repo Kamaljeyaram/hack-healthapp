@@ -14,12 +14,16 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../config/firebase';
 
 const { width } = Dimensions.get('window');
 
 type RootStackParamList = {
   Login: undefined;
-  FarmList: undefined;
+  PatientList: undefined;
+  PatientDashboard: { patientId: string };
+  DoctorDashboard: undefined;
   Signup: undefined;
 };
 
@@ -31,8 +35,9 @@ export default function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [userType, setUserType] = useState<'doctor' | 'patient'>('doctor');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -40,17 +45,31 @@ export default function LoginScreen({ navigation }: Props) {
 
     setIsLoading(true);
 
-    // Simulated login check
-    if (email === 'demo@example.com' && password === 'password123') {
-      setTimeout(() => {
-        setIsLoading(false);
-        navigation.navigate('FarmList');
-      }, 1000);
-    } else {
-      setTimeout(() => {
-        setIsLoading(false);
+    try {
+      // Sign in with email and password
+      await signInWithEmailAndPassword(auth, email, password);
+      
+      // In a real app, you would check the user type from your database
+      // For this example, we'll use the selected user type
+      if (userType === 'doctor') {
+        navigation.navigate('DoctorDashboard');
+      } else {
+        navigation.navigate('PatientDashboard', { patientId: '1' });
+      }
+      
+    } catch (error: any) {
+      // Handle specific Firebase auth errors
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         Alert.alert('Error', 'Invalid email or password');
-      }, 1000);
+      } else if (error.code === 'auth/invalid-email') {
+        Alert.alert('Error', 'Invalid email address format');
+      } else if (error.code === 'auth/too-many-requests') {
+        Alert.alert('Error', 'Too many failed login attempts. Please try again later.');
+      } else {
+        Alert.alert('Error', error.message || 'Failed to sign in');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -66,7 +85,34 @@ export default function LoginScreen({ navigation }: Props) {
             style={styles.logo}
           />
           <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Login to manage your farms</Text>
+          <Text style={styles.subtitle}>Login to access your account</Text>
+        </View>
+
+        <View style={styles.userTypeContainer}>
+          <TouchableOpacity
+            style={[
+              styles.userTypeButton,
+              userType === 'doctor' && styles.activeUserType
+            ]}
+            onPress={() => setUserType('doctor')}
+          >
+            <Text style={[
+              styles.userTypeText,
+              userType === 'doctor' && styles.activeUserTypeText
+            ]}>Doctor</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.userTypeButton,
+              userType === 'patient' && styles.activeUserType
+            ]}
+            onPress={() => setUserType('patient')}
+          >
+            <Text style={[
+              styles.userTypeText,
+              userType === 'patient' && styles.activeUserTypeText
+            ]}>Patient</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.form}>
@@ -77,6 +123,7 @@ export default function LoginScreen({ navigation }: Props) {
             keyboardType="email-address"
             autoCapitalize="none"
             editable={!isLoading}
+            darkMode={true}
           />
           <Input
             placeholder="Password"
@@ -84,21 +131,20 @@ export default function LoginScreen({ navigation }: Props) {
             onChangeText={setPassword}
             secureTextEntry
             editable={!isLoading}
+            darkMode={true}
           />
           <Button
-            title={isLoading ? "Logging in..." : "Login"}
+            title="Login"
             onPress={handleLogin}
             disabled={isLoading}
+            loading={isLoading}
             style={styles.button}
           />
         </View>
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account?</Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Signup')}
-            disabled={isLoading}
-          >
+          <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
             <Text style={styles.signupText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -106,55 +152,3 @@ export default function LoginScreen({ navigation }: Props) {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5FCFF',
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  header: {
-    alignItems: 'center',
-    marginTop: 50,
-    marginBottom: 40,
-  },
-  logo: {
-    width: width * 0.3,
-    height: width * 0.3,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#2E7D32',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#558B2F',
-  },
-  form: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  button: {
-    marginTop: 20,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  footerText: {
-    color: '#666',
-    marginRight: 5,
-  },
-  signupText: {
-    color: '#2E7D32',
-    fontWeight: 'bold',
-  },
-});

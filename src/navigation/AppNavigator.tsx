@@ -6,10 +6,11 @@ type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
   Signup: undefined;
-  FarmList: undefined;
-  Dashboard: {
-    farmId: string;
+  PatientList: undefined;
+  PatientDashboard: {
+    patientId: string;
   };
+  DoctorDashboard: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -17,8 +18,9 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 import AnimatedSplash from '../components/AnimatedSplash';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
-import FarmListScreen from '../screens/FarmListScreen';
-import Dashboard from '../screens/Dashboard';
+import PatientListScreen from '../screens/PatientListScreen';
+import PatientDashboard from '../screens/PatientDashboard';
+import DoctorDashboard from '../screens/DoctorDashboard';
 
 export default function AppNavigator() {
     return (
@@ -27,12 +29,15 @@ export default function AppNavigator() {
                 initialRouteName="Splash"
                 screenOptions={{
                     headerStyle: {
-                        backgroundColor: '#2E7D32',
+                        backgroundColor: '#1565C0',
                     },
                     headerTintColor: '#fff',
                     headerTitleStyle: {
                         fontWeight: 'bold',
                     },
+                    contentStyle: {
+                        backgroundColor: '#121212',
+                    }
                 }}>
                 <Stack.Screen
                     name="Splash"
@@ -50,14 +55,19 @@ export default function AppNavigator() {
                     options={{ headerShown: false }}
                 />
                 <Stack.Screen
-                    name="FarmList"
-                    component={FarmListScreen}
-                    options={{ headerTitle: 'My Farms' }}
+                    name="PatientList"
+                    component={PatientListScreen}
+                    options={{ headerTitle: 'My Patients' }}
                 />
                 <Stack.Screen
-                    name="Dashboard"
-                    component={Dashboard}
-                    options={{ headerTitle: 'Farm Dashboard' }}
+                    name="PatientDashboard"
+                    component={PatientDashboard}
+                    options={{ headerTitle: 'Patient Details' }}
+                />
+                <Stack.Screen
+                    name="DoctorDashboard"
+                    component={DoctorDashboard}
+                    options={{ headerShown: false }}
                 />
             </Stack.Navigator>
         </NavigationContainer>

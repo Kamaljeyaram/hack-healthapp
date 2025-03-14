@@ -1,76 +1,53 @@
 import React from 'react';
-import {
-    TouchableOpacity,
-    Text,
-    StyleSheet,
-    ActivityIndicator,
-    ViewStyle,
-    TextStyle,
-} from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
 
-interface Props {
-    title: string;
-    onPress: () => void;
-    disabled?: boolean;
-    loading?: boolean;
-    style?: ViewStyle;
-    textStyle?: TextStyle;
+interface ButtonProps {
+  title: string;
+  onPress: () => void;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+  loading?: boolean;
+  disabled?: boolean;
 }
 
-const Button: React.FC<Props> = ({
-    title,
-    onPress,
-    disabled,
-    loading,
-    style,
-    textStyle,
-}) => {
-    return (
-        <TouchableOpacity
-            style={[
-                styles.button,
-                disabled && styles.buttonDisabled,
-                style,
-            ]}
-            onPress={onPress}
-            disabled={disabled || loading}>
-            {loading ? (
-                <ActivityIndicator color="#fff" />
-            ) : (
-                <Text style={[styles.buttonText, textStyle]}>
-                    {title}
-                </Text>
-            )}
-        </TouchableOpacity>
-    );
+const Button = ({ title, onPress, style, textStyle, loading, disabled }: ButtonProps) => {
+  return (
+    <TouchableOpacity
+      style={[
+        styles.button,
+        style,
+        disabled && styles.disabledButton
+      ]}
+      onPress={onPress}
+      disabled={disabled || loading}
+    >
+      {loading ? (
+        <ActivityIndicator color="#FFFFFF" />
+      ) : (
+        <Text style={[styles.buttonText, textStyle]}>{title}</Text>
+      )}
+    </TouchableOpacity>
+  );
 };
 
 const styles = StyleSheet.create({
-    button: {
-        backgroundColor: '#2E7D32',
-        height: 50,
-        borderRadius: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    buttonDisabled: {
-        backgroundColor: '#a5d6a7',
-        elevation: 0,
-        shadowOpacity: 0,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
+  button: {
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: '#1976D2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  disabledButton: {
+    backgroundColor: '#666666',
+    opacity: 0.7,
+  }
 });
 
 export default Button;

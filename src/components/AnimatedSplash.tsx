@@ -40,8 +40,8 @@ export default function AnimatedSplash({ navigation }: { navigation: NavigationP
           source={require('../../assets/logo.png')}
           style={styles.logo}
         />
-        <Text style={styles.title}>AquaPonics</Text>
-        <Text style={styles.subtitle}>Smart Farming Solutions</Text>
+        <Text style={styles.title}>MediCare</Text>
+        <Text style={styles.subtitle}>Advanced Hospital Management</Text>
       </Animated.View>
     </View>
   );
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: '#121212',
   },
   logoContainer: {
     alignItems: 'center',
@@ -65,11 +65,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#2E7D32',
+    color: '#64B5F6',
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 18,
-    color: '#558B2F',
+    color: '#90CAF9',
   },
 });

@@ -12,13 +12,17 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../config/firebase';
 
 const { width } = Dimensions.get('window');
 
 type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
-  FarmList: undefined;
+  PatientList: undefined;
+  PatientDashboard: { patientId: string };
+  DoctorDashboard: undefined;
 };
 
 type Props = {
@@ -30,8 +34,10 @@ export default function SignupScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [userType, setUserType] = useState<'doctor' | 'patient'>('patient');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (!username || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -42,7 +48,38 @@ export default function SignupScreen({ navigation }: Props) {
       return;
     }
 
-    navigation.navigate('FarmList');
+    setIsLoading(true);
+
+    try {
+      // Create user with email and password
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // You can store additional user data in Firestore here
+      // For example: user type (doctor/patient), username, etc.
+      
+      setIsLoading(false);
+      
+      // Navigate based on user type
+      if (userType === 'doctor') {
+        navigation.navigate('DoctorDashboard');
+      } else {
+        navigation.navigate('PatientDashboard', { patientId: '1' });
+      }
+      
+    } catch (error: any) {
+      setIsLoading(false);
+      
+      // Handle specific Firebase auth errors
+      if (error.code === 'auth/email-already-in-use') {
+        Alert.alert('Error', 'Email address is already in use');
+      } else if (error.code === 'auth/invalid-email') {
+        Alert.alert('Error', 'Invalid email address format');
+      } else if (error.code === 'auth/weak-password') {
+        Alert.alert('Error', 'Password is too weak');
+      } else {
+        Alert.alert('Error', error.message || 'Failed to create account');
+      }
+    }
   };
 
   return (
@@ -53,15 +90,44 @@ export default function SignupScreen({ navigation }: Props) {
           style={styles.logo}
         />
         <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>Join the aquaponics community</Text>
+        <Text style={styles.subtitle}>Join our healthcare platform</Text>
+      </View>
+
+      <View style={styles.userTypeContainer}>
+        <TouchableOpacity
+          style={[
+            styles.userTypeButton,
+            userType === 'doctor' && styles.activeUserType
+          ]}
+          onPress={() => setUserType('doctor')}
+        >
+          <Text style={[
+            styles.userTypeText,
+            userType === 'doctor' && styles.activeUserTypeText
+          ]}>Doctor</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.userTypeButton,
+            userType === 'patient' && styles.activeUserType
+          ]}
+          onPress={() => setUserType('patient')}
+        >
+          <Text style={[
+            styles.userTypeText,
+            userType === 'patient' && styles.activeUserTypeText
+          ]}>Patient</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.form}>
         <Input
-          placeholder="Username"
+          placeholder="Full Name"
           value={username}
           onChangeText={setUsername}
-          autoCapitalize="none"
+          autoCapitalize="words"
+          darkMode={true}
+          editable={!isLoading}
         />
         <Input
           placeholder="Email"
@@ -69,23 +135,30 @@ export default function SignupScreen({ navigation }: Props) {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          darkMode={true}
+          editable={!isLoading}
         />
         <Input
           placeholder="Password"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          darkMode={true}
+          editable={!isLoading}
         />
         <Input
           placeholder="Confirm Password"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
+          darkMode={true}
+          editable={!isLoading}
         />
         <Button
           title="Sign Up"
           onPress={handleSignup}
           style={styles.button}
+          loading={isLoading}
         />
       </View>
 
@@ -102,7 +175,7 @@ export default function SignupScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5FCFF',
+    backgroundColor: '#121212',
   },
   header: {
     alignItems: 'center',
@@ -117,19 +190,47 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#2E7D32',
+    color: '#64B5F6',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#558B2F',
+    color: '#90CAF9',
     marginBottom: 20,
+  },
+  userTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  userTypeButton: {
+    flex: 1,
+    padding: 12,
+    alignItems: 'center',
+    borderRadius: 8,
+    backgroundColor: '#1E1E1E',
+    marginHorizontal: 5,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  activeUserType: {
+    backgroundColor: '#1976D2',
+    borderColor: '#1976D2',
+  },
+  userTypeText: {
+    color: '#BBBBBB',
+    fontWeight: 'bold',
+  },
+  activeUserTypeText: {
+    color: '#FFFFFF',
   },
   form: {
     padding: 20,
   },
   button: {
     marginTop: 20,
+    backgroundColor: '#1976D2',
   },
   footer: {
     flexDirection: 'row',
@@ -139,11 +240,11 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   footerText: {
-    color: '#666',
+    color: '#BBBBBB',
     marginRight: 5,
   },
   loginText: {
-    color: '#2E7D32',
+    color: '#64B5F6',
     fontWeight: 'bold',
   },
 });

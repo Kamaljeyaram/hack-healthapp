@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Fish Farm Monitor",
-    "slug": "fish-farm-monitor",
+    "name": "ai assisted health monitoring",
+    "slug": "health-monitoring",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

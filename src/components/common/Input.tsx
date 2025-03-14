@@ -1,47 +1,48 @@
 import React from 'react';
-import { TextInput, StyleSheet, TextInputProps } from 'react-native';
+import { TextInput, StyleSheet, View, TextInputProps } from 'react-native';
 
-interface Props extends TextInputProps {
-  error?: boolean;
+interface InputProps extends TextInputProps {
+  darkMode?: boolean;
 }
 
-const Input: React.FC<Props> = ({ style, error, ...props }) => {
+const Input = ({ style, darkMode = false, ...props }: InputProps) => {
   return (
-    <TextInput
-      style={[
-        styles.input,
-        error && styles.inputError,
-        style
-      ]}
-      placeholderTextColor="#999"
-      {...props}
-    />
+    <View style={styles.container}>
+      <TextInput
+        style={[
+          styles.input,
+          darkMode ? styles.darkInput : styles.lightInput,
+          style
+        ]}
+        placeholderTextColor={darkMode ? '#888888' : '#999999'}
+        {...props}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    marginBottom: 16,
+  },
   input: {
     height: 50,
-    backgroundColor: '#fff',
-    paddingHorizontal: 15,
-    borderRadius: 10,
+    borderRadius: 8,
+    paddingHorizontal: 16,
     fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
-    elevation: 1,
   },
-  inputError: {
-    borderColor: '#ff6b6b',
+  lightInput: {
+    backgroundColor: '#FFFFFF',
+    color: '#333333',
     borderWidth: 1,
+    borderColor: '#DDDDDD',
   },
+  darkInput: {
+    backgroundColor: '#1E1E1E',
+    color: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#333333',
+  }
 });
 
 export default Input;
